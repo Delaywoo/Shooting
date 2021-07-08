@@ -71,5 +71,18 @@ public class EnemyMove : MonoBehaviour
     }
 
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.name == "Player")
+        {
+            Destroy(collision.gameObject);
+            //옵션 창을 활성화 한다.
+            GameManager.gm.SetActiveOption(true);
+            //현재 점수를 저장한다.
+            GameManager.gm.SaveScore();
+            Destroy(gameObject);
+        }
+    }
+
 
 }

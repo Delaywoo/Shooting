@@ -11,17 +11,22 @@ public class PlayerMove : MonoBehaviour
     // A-B : B가 A를 향하는 벡터
 
     public float moveSpeed = 0.1f;
-    float shiftspeed;
+
+
+    float finalSpeed = 0;
+    Rigidbody rb;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        finalSpeed = moveSpeed;
+        rb = GetComponent<Rigidbody>();
+
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()  //일정한 시간에 한번씩 업데이트되는것
     {
         //if(Input.GetKeyDown(KeyCode.UpArrow))
         //{
@@ -39,17 +44,59 @@ public class PlayerMove : MonoBehaviour
 
         // 좌측 Shift 키를 누른 상태일 때에는 속도가 2배로 증가한다.
 
+        transform.position += direction * moveSpeed * Time.deltaTime;
 
-        shiftspeed = moveSpeed ;
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            shiftspeed = moveSpeed * 2;
+            finalSpeed = moveSpeed * 2;
 
+        }
+        else if(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            finalSpeed = moveSpeed;
         }
 
         // 좌측 Shiflt 키에서 손을 떼면 다시 원래 속도대로 돌아온다.
-        transform.position += direction * shiftspeed * Time.deltaTime;
+        
+
+        // 이번 프레임에 도착할 지점까지의 거리를 구한다.
+        Vector3 arrivePos = direction * finalSpeed * Time.deltaTime;
+
+        // 현재 위치에서 도착 지점까지 레이를 발사해본다.
+        Ray ray = new Ray(transform.position, direction);
+        RaycastHit hitInfo;
+
+        if(Physics.Raycast(ray, out hitInfo, arrivePos.magnitude))
+        {
+
+            if(hitInfo.distance < arrivePos.magnitude)
+            {
+                transform.position = hitInfo.point;
+                transform.position -= direction * 0.5f;
+
+            }
+            
+        }
+
+        else
+        {
+            rb.velocity = direction * finalSpeed;
+
+        }
+
+
+
+        //플레이어의 월드 좌표를 뷰포트 좌표로 환산한다.
+        //Vector3 viewPos = Camera.main.WorldToViewportPoint(transform.position);
+
+        //환산된 뷰포트 좌표를 0~1 사이의 값으로 제한한다.
+        //viewPos.x = Mathf.Clamp01(viewPos.x);
+        //viewPos.y = Mathf.Clamp01(viewPos.y);
+
+
+        //제한 적용된 뷰포트 좌표를 월드 좌표로 변환해서 플레이어 포지션으로 덮어쓴다.
+        //transform.position = Camera.main.ViewportToWorldPoint(viewPos);
         
         
 
