@@ -15,6 +15,21 @@ public class GameManager : MonoBehaviour
     public int currentScore = 0;
     public int bestScore = 0;
 
+    float currentTime;
+
+    
+
+
+    bool fadeStart = false;
+
+    public Image backImage;
+    public Text label;
+
+    Color startImageColor;
+    Color startlabelColor;
+    int startFontSize;
+
+
 
     private void Awake()
     {
@@ -33,6 +48,11 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        startImageColor = backImage.color;
+        startlabelColor = label.color;
+        startFontSize = label.fontSize;
+
+
         SetActiveOption(false);
         LoadScore();
     }
@@ -48,25 +68,35 @@ public class GameManager : MonoBehaviour
         //현재 점수를 UI에 반영한다.
         scoreText[0].text = "현재 점수: " + currentScore.ToString();
 
+        // 페이드 이펙트를 실행한다.
+        if (fadeStart)
+        {
+            FadeEffect();
+        }
 
     }
 
     //옵션 창을 생성하는 함수
     public void SetActiveOption(bool toggle)
     {
+        
         //UI창을 활성화 한다.
         canvasUI.SetActive(toggle);
 
-        //오브젝트의 시간의 흐름을 멈춘다.
-        if(toggle)
-        {
-            Time.timeScale = 0;
-        }
-        else
-        {
-            Time.timeScale = 1;
+        fadeStart = toggle;
 
-        }
+
+
+        //오브젝트의 시간의 흐름을 멈춘다.
+        //if(toggle)
+        //{
+        //    Time.timeScale = 0;
+        //}
+        //else
+        //{
+        //    Time.timeScale = 1;
+
+        //}
 
                  
         
@@ -92,6 +122,37 @@ public class GameManager : MonoBehaviour
         bestScore = PlayerPrefs.GetInt("score");
 
         scoreText[1].text = "최고 점수: " + bestScore.ToString();
+    }
+
+
+    void FadeEffect()
+    {
+        // 값을 최초 저장한 값에서 목표한 값으로 시간의 흐름에 따라 변화시키고 싶다. 
+        // Lerp 함수
+        if(currentTime < 1.0)
+        {
+            currentTime += Time.deltaTime;
+
+            float alpha = Mathf.Lerp(startImageColor.a, 0.8f, currentTime);
+            backImage.color = new Color(startImageColor.r, startImageColor.g, startImageColor.b, alpha);
+            //backImage.color = Color.Lerp(startImageColor, new Color(startImageColor.r, startImageColor.g, startImageColor.b, 0.8f), currentTime);
+
+            float alpha2 = Mathf.Lerp(startlabelColor.a, 1.0f, currentTime);
+            label.color = startlabelColor + new Color(0, 0, 0, alpha2);
+
+            int size = (int)Mathf.Lerp((float)startFontSize, 90.0f, currentTime);
+            label.fontSize = size;
+
+
+        }
+        else
+        {
+            Time.timeScale = 0;
+            fadeStart = false;
+        }    
+
+
+
     }
 
 }
